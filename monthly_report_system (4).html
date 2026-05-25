@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบรายงานผลการปฏิบัติงานประจำเดือน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-mid: #243560;
+  --gold: #c8a84b;
+  --gold-light: #e8cc7a;
+  --cream: #f9f6ef;
+  --white: #ffffff;
+  --border: #d4c9a8;
+  --text: #1a1a2e;
+  --muted: #6b6b85;
+  --red: #c0392b;
+  --green: #1a6b3c;
+  --shadow: 0 4px 24px rgba(26,39,68,0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.site-header {
+  background: var(--navy);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+}
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-icon {
+  width: 42px; height: 42px;
+  background: var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.header-text h1 {
+  font-family: 'Noto Serif Thai', serif;
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.header-text p {
+  color: var(--gold-light);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ===== STEP BAR ===== */
+.stepbar {
+  background: var(--navy-mid);
+  padding: 0 24px;
+}
+.stepbar-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+}
+.step-tab {
+  padding: 10px 20px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.step-tab.active {
+  color: var(--gold-light);
+  border-bottom-color: var(--gold);
+  font-weight: 500;
+}
+.step-num {
+  display: inline-flex;
+  width: 18px; height: 18px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  align-items: center; justify-content: center;
+  font-size: 11px;
+  margin-right: 6px;
+}
+.step-tab.active .step-num {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+/* ===== MAIN CONTAINER ===== */
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 24px 60px;
+}
+
+/* ===== PANELS ===== */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ===== CARD ===== */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-family: 'Noto Serif Thai', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-title .icon { font-size: 20px; }
+
+/* ===== FORM ELEMENTS ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-grid.cols-1 { grid-template-columns: 1fr; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy);
+}
+.field label .req { color: var(--red); margin-left: 2px; }
+
+input[type="text"], input[type="number"], input[type="date"],
+select, textarea {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: #fafaf8;
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(26,39,68,0.08);
+  background: var(--white);
+}
+select { cursor: pointer; }
+textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+/* ===== TABLE FORM ===== */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.report-table th {
+  background: var(--navy);
+  color: var(--white);
+  padding: 10px 12px;
+  text-align: center;
+  font-weight: 500;
+  border: 1px solid var(--navy-mid);
+  line-height: 1.4;
+}
+.report-table th.gold { background: var(--gold); color: var(--navy); }
+.report-table td {
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  vertical-align: middle;
+}
+.report-table td.section-header {
+  background: #f0eee8;
+  font-weight: 600;
+  color: var(--navy);
+  padding: 10px 12px;
+}
+.report-table td.task-label {
+  background: #fafaf8;
+  color: var(--text);
+  line-height: 1.5;
+  padding-left: 20px;
+}
+.report-table td.task-label.sub { padding-left: 32px; color: var(--muted); }
+.report-table input[type="text"],
+.report-table input[type="number"],
+.report-table textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 13px;
+  width: 100%;
+  min-height: unset;
+}
+.report-table textarea { min-height: 56px; }
+.report-table .center { text-align: center; }
+
+/* row total highlight */
+.total-row td { background: #f5f2ea; font-weight: 500; }
+
+/* ===== MONTH SELECTOR ===== */
+.month-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--navy);
+  color: var(--white);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+/* ===== POSITION SELECTOR ===== */
+.pos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.pos-card {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.pos-card:hover { border-color: var(--navy); background: #f3f1ea; }
+.pos-card.selected { border-color: var(--gold); background: #fdf9f0; box-shadow: 0 0 0 3px rgba(200,168,75,0.15); }
+.pos-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.pos-info h3 { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+.pos-info p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ===== SIGNATURE PAD ===== */
+.sig-wrap {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: white;
+  position: relative;
+  width: 100%;
+  height: 180px;
+  cursor: crosshair;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.sig-wrap svg {
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  overflow: visible;
+}
+.sig-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #ccc;
+  pointer-events: none;
+  gap: 6px;
+}
+.sig-hint.hidden { display: none; }
+.sig-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+}
+.btn-primary {
+  background: var(--navy);
+  color: white;
+}
+.btn-primary:hover { background: var(--navy-mid); }
+.btn-gold {
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 600;
+}
+.btn-gold:hover { background: var(--gold-light); }
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+}
+.btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-danger { background: var(--red); color: white; }
+.btn-danger:hover { background: #a93226; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* ===== NOTICE ===== */
+.notice {
+  border-left: 4px solid var(--gold);
+  background: #fdf9f0;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+  color: var(--navy);
+  margin-bottom: 20px;
+}
+.notice strong { font-weight: 600; }
+
+/* ===== SUCCESS STATE ===== */
+.success-wrap {
+  text-align: center;
+  padding: 60px 20px;
+}
+.success-icon { font-size: 64px; margin-bottom: 16px; }
+.success-wrap h2 {
+  font-family: 'Noto Serif Thai', serif;
+  font-size: 24px;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.success-wrap p { color: var(--muted); font-size: 15px; }
+
+/* ===== PRINT ===== */
+@media print {
+  .site-header, .stepbar, .btn-row, .sig-actions, .no-print { display: none !important; }
+  .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+  body { background: white; }
+  .main { padding: 0; }
+  .panel { display: block !important; }
+}
+
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid.cols-3 { grid-template-columns: 1fr; }
+  .pos-grid { grid-template-columns: 1fr; }
+  .card { padding: 20px 16px; }
+  .stepbar { overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-icon">⚖️</div>
+    <div class="header-text">
+      <h1>ระบบรายงานผลการปฏิบัติงานประจำเดือน</h1>
+      <p>กลุ่มเลขานุการตุลาการในศาลปกครองสูงสุด · สำนักประธานศาลปกครองสูงสุด</p>
+    </div>
+  </div>
+  <div class="stepbar">
+    <div class="stepbar-inner">
+      <div class="step-tab active" id="tab1" onclick="goStep(1)"><span class="step-num">1</span>เลือกตำแหน่ง</div>
+      <div class="step-tab" id="tab2" onclick="goStep(2)"><span class="step-num">2</span>กรอกรายงาน</div>
+      <div class="step-tab" id="tab3" onclick="goStep(3)"><span class="step-num">3</span>ลงนาม & ส่ง</div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ====== STEP 1: เลือกตำแหน่ง ====== -->
+<div class="panel active" id="step1">
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span>ข้อมูลผู้ส่งรายงาน</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>ชื่อ-นามสกุล <span class="req">*</span></label>
+        <input type="text" id="inp-name" placeholder="เช่น นางสาวสมใจ ใจดี">
+      </div>
+      <div class="field">
+        <label>เดือน/ปี ที่รายงาน <span class="req">*</span></label>
+        <input type="month" id="inp-month" value="2026-04">
+      </div>
+    </div>
+
+    <div class="card-title" style="margin-top:8px"><span class="icon">🗂️</span>เลือกตำแหน่ง / ฟอร์มที่ใช้</div>
+    <div class="notice"><strong>หมายเหตุ:</strong> เลือกตำแหน่งของท่านเพื่อให้ระบบแสดงฟอร์มที่ถูกต้อง</div>
+
+    <div class="pos-grid">
+      <div class="pos-card" onclick="selectPos('secretary')" id="pos-secretary">
+        <div class="pos-icon">📁</div>
+        <div class="pos-info">
+          <h3>เลขาฯ หน้าห้อง</h3>
+          <p>งานบริหารจัดการสำนวนคดี หนังสือราชการ นัดหมาย และงานธุรการคดีในหน้าที่ปกติ</p>
+        </div>
+      </div>
+      <div class="pos-card" onclick="selectPos('admin_case')" id="pos-admin_case">
+        <div class="pos-icon">⚖️</div>
+        <div class="pos-info">
+          <h3>ธุรการคดี</h3>
+          <p>งานสืบค้นข้อมูลด้านกฎหมาย บริหารจัดการสำนวนคดี บันทึก AMD CASE และงานสนับสนุนตุลาการ</p>
+        </div>
+      </div>
+      <div class="pos-card" onclick="selectPos('admin_group')" id="pos-admin_group">
+        <div class="pos-icon">📬</div>
+        <div class="pos-info">
+          <h3>ธุรการกลุ่ม</h3>
+          <p>งานสารบรรณ จัดการหนังสือราชการ ลงทะเบียนรับ-ส่ง ระบบ E-Filing และงานธุรการทั่วไป</p>
+        </div>
+      </div>
+      <div class="pos-card" onclick="selectPos('director')" id="pos-director">
+        <div class="pos-icon">👩‍💼</div>
+        <div class="pos-info">
+          <h3>ผอ.กลุ่ม</h3>
+          <p>ควบคุมดูแลการบริหารงานเอกสาร ผู้นำเรียนตุลาการ รายงานผลการดำเนินงาน และภารกิจผู้บังคับบัญชา</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="goStep(2)">ถัดไป: กรอกรายงาน →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== STEP 2: กรอกรายงาน ====== -->
+<div class="panel" id="step2">
+
+  <!-- FORM: เลขาฯ หน้าห้อง -->
+  <div id="form-secretary" class="form-wrap" style="display:none">
+    <div class="card">
+      <div class="month-badge">📅 <span id="month-label-sec"></span></div>
+      <div class="card-title"><span class="icon">📁</span>แบบรายงานผลการปฏิบัติงานประจำเดือน — เลขาฯ หน้าห้อง</div>
+
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th style="width:30px">ที่</th>
+            <th>งาน/กิจกรรม</th>
+            <th style="width:90px">เป้าหมาย<br>(ถ้ามี)</th>
+            <th style="width:90px">ระยะเวลา<br>(ถ้ามี)</th>
+            <th style="width:110px">ปริมาณงานที่ได้ปฏิบัติจริง<br>(ปริมาณ/คุณภาพ)</th>
+            <th style="width:130px">บุคลากรมีส่วนร่วมฯ</th>
+            <th style="width:100px">ปัญหาอุปสรรค/ความเห็น</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="section-header" colspan="7">1 งาน/กิจกรรมในหน้าที่ปกติ</td></tr>
+          <tr><td class="task-label" colspan="7">1.1 งานบริหารจัดการสำนวนคดี</td></tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">การลงทะเบียนรับ-ส่ง และเสนอสำนวนคดีต่อตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text" placeholder="เป้าหมาย"></td>
+            <td><input type="text" placeholder="ระยะเวลา"></td>
+            <td><input type="text" placeholder="ปริมาณ/คุณภาพ"></td>
+            <td><input type="text" placeholder="ผู้ร่วม"></td>
+            <td><input type="text" placeholder="ปัญหา/เห็น"></td>
+          </tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">การประสานงานและดำเนินการในส่วนต่าง ๆ ที่เกี่ยวข้องกับการบริหารจัดการสำนวนคดี</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">การจัดทำบัญชีสถิติคดีของตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">การจัดเตรียมเอกสารและจัดเตรียมการประชุม</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">งานธุรการคดีและอื่นๆ ที่เกี่ยวข้องกับการบริหารจัดการสำนวนคดีให้กับตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="4" class="center">รวม 1.1</td>
+            <td><input type="text" placeholder="รวมครั้ง"></td>
+            <td></td><td></td>
+          </tr>
+
+          <tr><td colspan="7" class="task-label">1.2 งานลงระบบความเคลื่อนไหวสำนวนคดีในระบบ ADM CASE</td></tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">ลงระบบความเคลื่อนไหวสำนวนคดี</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+
+          <tr><td colspan="7" class="task-label">1.3 งานบริหารจัดการหนังสือราชการและเอกสาร</td></tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">ลงทะเบียนรับ-ส่ง เสนอหนังสือราชการต่อตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">การตรวจกลั่นกรองหนังสือราชการให้กับตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">การจัดเก็บเอกสารในแฟ้มเอกสารและจัดทำทะเบียนคุมเอกสารพร้อมทั้งมีการจัดทำสารบัญแฟ้ม</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="4" class="center">รวม 1.3</td>
+            <td><input type="text" placeholder="รวมครั้ง"></td>
+            <td></td><td></td>
+          </tr>
+
+          <tr><td colspan="7" class="task-label">1.4 งานบริหารจัดการนัดหมาย</td></tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">ลงนัดหมายในสมุดนัดหมายให้กับตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr>
+            <td class="center sub">-</td>
+            <td class="task-label sub">การประสานงานนัดหมายและจัดการนัดหมายให้กับตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="4" class="center">รวม 1.4</td>
+            <td><input type="text" placeholder="รวมครั้ง"></td>
+            <td></td><td></td>
+          </tr>
+
+          <tr><td class="section-header" colspan="7">2 งาน/กิจกรรมที่ได้รับมอบหมายพิเศษ</td></tr>
+          <tr>
+            <td class="center sub">2.1</td>
+            <td class="task-label sub">ภารกิจอื่น ๆ ที่ได้รับมอบหมายจากผู้บังคับบัญชา เช่น งานธุรกรรมทางเงิน งานโปรษณีย์ จัดเตรียมสื่ออิเล็กทรอนิกส์ในการประชุม สัมมนา บรรยาย งานเบิกค่าใช้จ่ายต่าง ๆ ที่เป็นสวัสดิการ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr>
+            <td class="center sub">2.2</td>
+            <td class="task-label sub">งานที่ได้รับมอบหมายจาก ผอ.สำนัก, ผอ.กลุ่ม (ตามคำสั่งหรือข้อสั่งการ)</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="4" class="center">รวม หมวด 2</td>
+            <td><input type="text" placeholder="รวมครั้ง"></td>
+            <td></td><td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORM: ธุรการกลุ่ม -->
+  <div id="form-admin_group" class="form-wrap" style="display:none">
+    <div class="card">
+      <div class="month-badge">📅 <span id="month-label-ag"></span></div>
+      <div class="card-title"><span class="icon">📬</span>แบบรายงานผลการปฏิบัติงานประจำเดือน — ธุรการกลุ่ม</div>
+
+      <div class="form-grid cols-3">
+        <div class="field">
+          <label>ชื่อ (ยืนยัน)</label>
+          <input type="text" id="ag-name" placeholder="ชื่อ-สกุล">
+        </div>
+        <div class="field">
+          <label>ตำแหน่ง</label>
+          <input type="text" placeholder="เจ้าพนักงานธุรการปฏิบัติงาน" value="เจ้าพนักงานธุรการปฏิบัติงาน">
+        </div>
+        <div class="field">
+          <label>ระยะเวลาที่รายงาน</label>
+          <input type="text" id="ag-period" placeholder="1-30 เม.ย. 69">
+        </div>
+      </div>
+
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th style="width:30px">ที่</th>
+            <th>งาน/กิจกรรม</th>
+            <th style="width:90px">เป้าหมาย<br>(ถ้ามี)</th>
+            <th style="width:90px">ระยะเวลา<br>(ถ้ามี)</th>
+            <th style="width:120px">ปริมาณงานที่ได้ปฏิบัติจริง<br>(ปริมาณ/คุณภาพ)</th>
+            <th style="width:130px">บุคลากรมีส่วนร่วมฯ</th>
+            <th style="width:100px">ปัญหาอุปสรรค/ความเห็น</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="section-header" colspan="7">1 งาน/กิจกรรมในหน้าที่ปกติ</td></tr>
+          <!-- รายการ 15 ข้อ ตามฟอร์ม ธุรการกลุ่ม -->
+          <tr><td class="center">1</td><td class="task-label">ดำเนินการแจ้งข้อมูลข่าวสาร หนังสือราชการผ่านทางระบบเทคโนโลยีสารสนเทศ</td>
+            <td><input type="text"></td><td><input type="text" placeholder="1-30 เม.ย.69"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">2</td><td class="task-label">งานลงทะเบียนรับ-ส่งหนังสือราชการทั่วไปและอื่นๆ ตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">3</td><td class="task-label">ดำเนินการรับ-ส่งหนังสือราชการทั่วไปและอื่นๆ ตุลาการศาลปกครองสูงสุด ผ่านระบบสารบรรณอิเล็กทรอนิกส์ 2</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">4</td><td class="task-label">งานลงทะเบียนรับ-ส่งหนังสือราชการ ลับ ตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">5</td><td class="task-label">งานลงทะเบียนรับหนังสือกลุ่มเลขานุการตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">6</td><td class="task-label">ดำเนินการลงรับทะเบียนรับหนังสือกลุ่มเลขานุการตุลาการศาลปกครองสูงสุด ผ่านระบบสารบรรณอิเล็กทรอนิกส์ 2</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">7</td><td class="task-label">ดำเนินการจัดชุดเอกสารเสนอตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ชุด"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">8</td><td class="task-label">ดำเนินการแจ้งหนังสือราชการตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td>
+            <td><input type="text" placeholder="ปฏิบัติงานร่วมกับ นางสาว..."></td><td><input type="text"></td></tr>
+          <tr><td class="center">9</td><td class="task-label">ดำเนินการแจ้งเวียนหนังสือราชการบุคลากรในสังกัดกลุ่มเลขานุการฯ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td>
+            <td><input type="text" placeholder="ปฏิบัติงานร่วมกับ นางสาว..."></td><td><input type="text"></td></tr>
+          <tr><td class="center">10</td><td class="task-label">ดำเนินการรับ-ส่ง จดหมายนัยตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">11</td><td class="task-label">ดำเนินการส่ง-คืน เอกสารที่ท่านประธานาพิจารณาแล้ว</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">12</td><td class="task-label">ดำเนินการออกเลขหนังสือกลุ่มเลขานุการตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">13</td><td class="task-label">ดำเนินการจัดเก็บเอกสารเข้าแฟ้ม</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">14</td><td class="task-label">ร่างหนังสือเสนอความเห็นต่อผู้อำนวยการกลุ่มเลขานุการตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">15</td><td class="task-label">ดำเนินการจัดเก็บหนังสือเวียนในรูปแบบไฟล์ (Scan)</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7">2 งาน/กิจกรรมที่ได้รับมอบหมายพิเศษ</td></tr>
+          <tr><td class="center">1</td><td class="task-label">รวบรวมรายงานแม่บ้านประจำเดือน</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">2</td><td class="task-label">รวบรวมรายงานผลการปฏิบัติงานประจำเดือนของบุคลากรกลุ่มเลขานุการตุลาการในศาลปกครองสูงสุด (ข้อมูล ณ วันที่ 1-30)</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">3</td><td class="task-label">การขอรับบริการข้อมูลกลุ่มเลขานุการตุลาการในศาลปกครองสูงสุด ประจำเดือน</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORM: ธุรการคดี -->
+  <div id="form-admin_case" class="form-wrap" style="display:none">
+    <div class="card">
+      <div class="month-badge">📅 <span id="month-label-ac"></span></div>
+      <div class="card-title"><span class="icon">⚖️</span>แบบรายงานผลการปฏิบัติงานประจำเดือน — ธุรการคดี</div>
+
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>ที่</th>
+            <th>งาน/กิจกรรม</th>
+            <th style="width:90px">เป้าหมาย<br>(ถ้ามี)</th>
+            <th style="width:90px">ระยะเวลา<br>(ถ้ามี)</th>
+            <th style="width:120px">ปริมาณงานที่ได้ปฏิบัติจริง<br>(ปริมาณ/คุณภาพ)</th>
+            <th style="width:130px">บุคลากรมีส่วนร่วมฯ</th>
+            <th style="width:100px">ปัญหาอุปสรรค/ความเห็น</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="section-header" colspan="7">ก งาน/กิจกรรมตามหน้าที่ความรับผิดชอบ</td></tr>
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500">ก.๑ งานสืบค้นข้อมูลด้านกฎหมาย</td></tr>
+          <tr><td class="center">-</td><td class="task-label">สืบค้นข้อมูลด้านกฎหมาย คำพิพากษา/คำสั่ง ข้อมูลทางคดี และข้อมูลอื่นๆ</td>
+            <td><input type="text"></td><td><input type="text" placeholder="ก-กค.เม.ย.๖๙"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500">ก.๒ งานบริหารจัดการสำนวนคดี</td></tr>
+          <tr><td class="center">-</td><td class="task-label">การลงทะเบียนรับ-ส่ง จำหน่ายสำนวน/คำพิพากษา</td>
+            <td><input type="text"></td><td><input type="text" placeholder="ก-กค.เม.ย.๖๙"></td>
+            <td><input type="text" placeholder="จำนวน ... คดี"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label">การลงทะเบียนรับ-ส่ง รายการคดีเข้าที่ประชุมใหญ่</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... คดี"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label">การลงทะเบียนรับ-ส่ง การวินิจฉัยชี้ขาดอำนาจหน้าที่ระหว่างศาล</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... คดี"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label">การลงทะเบียนรับ-ส่ง คดีออกกฎหมายแขนง กรมเดิมตุลาการพ้นจากตำแหน่ง</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... คดี"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500">ก.๓ การตรวจสอบงานคดีปกครองในระบบ AMD CASE</td></tr>
+          <tr><td class="center">-</td><td class="task-label">ลงระบบความเคลื่อนไหวคดีที่อยู่ในความครบครองเสนอต่อองค์ประธานาฯ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500">ก.๔ งานสนุกงานบริหารจัดการหนังสือราชการหรือเอกสาร</td></tr>
+          <tr><td class="center">-</td><td class="task-label">การลงทะเบียนรับ-ส่ง หนังสือราชการทั่วไปและเอกสารอื่นๆ เพื่อเสนอต่อองค์ประธานาฯ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td>
+            <td><input type="text" placeholder="นางสาว..."></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500">ก.๕ ปฏิบัติงานเกี่ยวกับการลงบัญชีนัดหมาย / การประชุม</td></tr>
+          <tr><td class="center">-</td><td class="task-label">การลงบัญชีนัดหมายของประธานาฯ / การอำนวยความสะดวกในการปฏิบัติงาน</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td>
+            <td><input type="text" placeholder="นางสาว..."></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7">ข งาน/กิจกรรมที่ได้รับมอบหมายพิเศษ</td></tr>
+          <tr><td class="center">ก</td><td class="task-label">จัดทำบัญชีความเคลื่อนไหวคดีที่อยู่ในความครบครองเสนอต่อองค์ประธานาฯ</td>
+            <td><input type="text"></td><td><input type="text" placeholder="ก-กค.เม.ย.๖๙"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง/เดือน"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">ข</td><td class="task-label">ขอรับบริการในงานในแก้พัทธุ์/แจ้งข้อต่างๆ ในส่วนของหน้าที่ประธานาฯ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง/เดือน"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">ค</td><td class="task-label">จัดพิมพ์เอกสารงานอื่นๆ / สำเนางานอื่น เอกสาร</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... หน้า/เดือน"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">ง</td><td class="task-label">จัดเตรียมสื่ออิเล็คทรอนิกส์ในการประชุม สัมมนา บรรยาย</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">จ</td><td class="task-label">จัดทำบัญชีสถิติสำนวนคดี</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... คดี/เดือน"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">ฉ</td><td class="task-label">งานอื่นๆ ที่ประธานาฯ มอบหมาย</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">ช</td><td class="task-label">งานอื่นๆ ที่สำนักงานมอบหมาย/จัดทำงานสรุปสถิติคดี</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... หน้า/เดือน"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <!-- แถวว่าง 3 แถว สำหรับงานเพิ่มเติม -->
+          <tr><td></td><td><input type="text" placeholder="งานเพิ่มเติม (ถ้ามี)"></td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORM: ผอ.กลุ่ม -->
+  <div id="form-director" class="form-wrap" style="display:none">
+    <div class="card">
+      <div class="month-badge">📅 <span id="month-label-dir"></span></div>
+      <div class="card-title"><span class="icon">👩‍💼</span>แบบรายงานผลการปฏิบัติงานประจำเดือน — ผอ.กลุ่ม</div>
+
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th style="width:30px">ที่</th>
+            <th>งาน/กิจกรรม</th>
+            <th style="width:80px">เป้าหมาย<br>(ถ้ามี)</th>
+            <th style="width:80px">ระยะเวลา<br>(ถ้ามี)</th>
+            <th style="width:120px">ปริมาณงานหรือผลงานที่ได้ปฏิบัติจริง<br>(ปริมาณ/คุณภาพ)</th>
+            <th style="width:130px">บุคลากรมีส่วนร่วมในการทำงาน (กรณีทำร่วมกับผู้อื่นให้ระบุว่าเป็นหัวหน้าทีม/คณะหรือทำงานอื่นๆ)</th>
+            <th style="width:90px">ปัญหาอุปสรรค/ความเห็น</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="section-header" colspan="7">1 การกิจประจำที่สำคัญ</td></tr>
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500; padding-left:24px">1.1 ควบคุม ดูแล การบริหารจัดการงานเอกสารของกลุ่มเลขานุการฯ ให้เป็นไปด้วยความเรียบร้อย ดังนี้</td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ควบคุม ดูแล ตรวจสอบ กลั่นกรอง หนังสือราชการหรือเอกสาร ที่เสนอผู้บริหารศาลปกครองสูงสุดและตุลาการของกลุ่มเลขานุการฯ รวมถึงหนังสือที่เกี่ยวข้องกับกลุ่มเลขาฯ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500; padding-left:24px">1.2 ควบคุม ดูแล การจัดทำหนังสือนำเนียนตุลาการในศาลปกครองสูงสุด</td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ควบคุม ดูแล การจัดทำหนังสือเวียน เพื่อนำเรียนตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง ... ชุด"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ควบคุม ดูแล การแจ้งเวียนหนังสือราชการหรือเอกสารอื่นๆ เพื่อนำเรียนตุลาการ และระบบงานสารบรรณ 2 เพื่อนำเรียนตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... เรื่อง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500; padding-left:24px">1.3 การบริหารจัดการงานของกลุ่มเลขานุการฯ ให้เป็นไปด้วยความเรียบร้อย ดังนี้</td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ควบคุม ดูแล การออกเลขหนังสือกลุ่มเลขานุการตุลาการศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ควบคุม ดูแล การแจ้งเวียนหนังสือราชการหรือเอกสารหรือข้อมูลข่าวสารทางโลกน์กลุ่มเลขานุการฯ และระบบงานสารบรรณ 2</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ควบคุม ดูแล การแจ้งข้อมูล คำสั่ง กิจกรรม และงานต่างๆ ให้บุคลากรกลุ่มเลขาฯ ดำเนินการในส่วนที่เกี่ยวข้อง</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">การรายงานหรือหารือหรือสอบเสนอข้อคิดเห็นต่อ ผอ.สปส. เพื่อพิจารณาและพิจารณา</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500; padding-left:24px">1.4 ควบคุม ดูแล ให้คำปรึกษา แนะนำ ประสานความร่วมมือ ประเมินผลการปฏิบัติงานของบุคลากรกลุ่มเลขานุการฯ ดังนี้</td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ควบคุมดูแลและจัดการรวบรวมและจัดส่งงานผลการปฏิบัติงานประจำเดือนของกลุ่มเลขาฯ พร้อมทั้งส่งงานในในรายงานก่อนรายงานต่อ ผอ.สปส.</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">การบริหารจัดการ ควบคุม ดูแล ให้คำปรึกษา แนะนำ ประสานความร่วมมือกับกลุ่มเลขานุการฯ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ประสานความร่วมมือกับหน่วยงานอื่น ๆ หรือแจ้งข้อมูลต่าง ๆ ตามที่หน่วยงานอื่นร้องขอ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">การดำเนินการเกี่ยวกับกฎตกลงระดับบุคคล (ส่งคะแนนแบบประเมิน 1/2569)</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7" style="background:#e8e6de; font-weight:500; padding-left:24px">1.5 ภารกิจที่ ผอ.สปส. มอบหมาย และภารกิจอื่น ๆ ได้แก่</td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">ประชุม/อบรม/สัมมนา (1.ปช.ประเมินา ครั้งที่ 1/2569)</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">การปฏิบัติราชการแทน ในเรื่องการพิจารณาและอนุญาตการลาต่างๆ รวมทั้งการขอกลับก่อนและการรับรองรายบริหารราชการฯ</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">การปฏิบัติราชการแทน ลงนามในหนังสือราชการต่างๆ เพื่อแจ้งเวียนข่าวสารและประชาสัมพันธ์ให้กับตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">รวบรวมรายงานคดีที่ค้างการพิจารณาของแผนกและองค์คณะ .สถิติคดีตรวจสอบ. แบบประเมินบุคลากรในศาลปกครองสูงสุด.สถิติผู้มีผลงาน</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td class="center">-</td><td class="task-label sub">การกิจอื่น ๆ ที่ได้รับมอบหมาย (รายงานประหยัดพลังงานกลุ่มเลขาฯ / บันทึกการเดินทางไปต่างประเทศ / อนุมัติบัตรจอดรถ - บัตรเติ๊ก - wifi / เรื่องอับ)</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text" placeholder="จำนวน ... ครั้ง"></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7">2 ภารกิจกำกับดูแลการดำเนินการเองตามแผนพัฒนารายบุคคล (IDP) ของผู้ใต้บังคับบัญชา</td></tr>
+          <tr><td class="center">-</td><td class="task-label">ลงนามให้ความเห็นชอบ/การรายงาน/รับรอง ตาม แผนพัฒน IDP2 ประจำปีงบประมาณ พ.ศ. 2569</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><textarea placeholder="จำนวน ... ราย&#10;บรรลุเป้าหมายร้อยละ 100"></textarea></td><td><input type="text"></td><td><input type="text"></td></tr>
+
+          <tr><td class="section-header" colspan="7">3 ภารกิจกำกับดูแลและพัฒนากระบวนงานในให้บริการของหน่วยงาน</td></tr>
+          <tr><td class="center">-</td><td class="task-label">การควบคุม ดูแล พัฒนาระบบการให้บริการข้อมูลของกลุ่มเลขานุการตุลาการในศาลปกครองสูงสุด</td>
+            <td><input type="text"></td><td><input type="text"></td>
+            <td><textarea placeholder="จำนวน ... ครั้ง&#10;คำขอดำเนินการแล้วเสร็จร้อยละ 100"></textarea></td><td><input type="text"></td><td><input type="text"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-outline" onclick="goStep(1)">← ย้อนกลับ</button>
+    <button class="btn btn-gold" onclick="goStep(3)">ถัดไป: ลงนาม & ส่ง →</button>
+  </div>
+</div>
+
+<!-- ====== STEP 3: ลงนาม & ส่ง ====== -->
+<div class="panel" id="step3">
+  <div class="card">
+    <div class="card-title"><span class="icon">✍️</span>ลงนามรับรองรายงาน</div>
+    <div class="notice"><strong>ข้อมูลผู้ส่งรายงาน</strong> — กรุณาตรวจสอบความถูกต้องก่อนลงนาม</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>ชื่อผู้ปฏิบัติงาน</label>
+        <input type="text" id="confirm-name" readonly style="background:#f0eee8; cursor:default">
+      </div>
+      <div class="field">
+        <label>ตำแหน่ง</label>
+        <input type="text" id="confirm-pos" readonly style="background:#f0eee8; cursor:default">
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>เดือนที่รายงาน</label>
+        <input type="text" id="confirm-month" readonly style="background:#f0eee8; cursor:default">
+      </div>
+      <div class="field">
+        <label>วันที่ส่งรายงาน</label>
+        <input type="text" id="confirm-date" readonly style="background:#f0eee8; cursor:default">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🖊️</span>ลายมือชื่อผู้ปฏิบัติงาน</div>
+
+    <!-- Tab เลือกวิธี -->
+    <div style="display:flex; gap:0; margin-bottom:14px; border:1.5px solid var(--border); border-radius:8px; overflow:hidden; width:fit-content;">
+      <button id="sig-tab-draw"   onclick="switchSigTab('draw')"
+        style="padding:7px 18px; font-size:13px; font-family:inherit; border:none; cursor:pointer; background:var(--navy); color:white; font-weight:500;">
+        ✍️ วาดลายเซ็น
+      </button>
+      <button id="sig-tab-upload" onclick="switchSigTab('upload')"
+        style="padding:7px 18px; font-size:13px; font-family:inherit; border:none; cursor:pointer; background:white; color:var(--muted);">
+        📎 อัปโหลดรูปลายเซ็น
+      </button>
+    </div>
+
+    <!-- Panel: วาด -->
+    <div id="sig-panel-draw">
+      <p style="font-size:13px; color:var(--muted); margin-bottom:10px">ลงลายมือชื่อในกรอบด้านล่าง โดยใช้เมาส์หรือนิ้วบนหน้าจอสัมผัส</p>
+      <div class="sig-wrap" id="sig-wrap">
+        <svg id="sig-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="sig-hint" id="sig-hint">✍️ ลงลายมือชื่อที่นี่</div>
+      </div>
+      <div class="sig-actions">
+        <button class="btn btn-outline btn-sm" onclick="clearSig()">🗑 ลบลายเซ็น</button>
+      </div>
+    </div>
+
+    <!-- Panel: อัปโหลด -->
+    <div id="sig-panel-upload" style="display:none">
+      <p style="font-size:13px; color:var(--muted); margin-bottom:10px">
+        อัปโหลดรูปลายเซ็นอิเล็กทรอนิกส์ของท่าน (PNG, JPG, หรือ GIF พื้นหลังโปร่งใสดีที่สุด)
+      </p>
+
+      <!-- Drop zone -->
+      <label for="sig-file-input" id="sig-dropzone"
+        style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+               border:2px dashed var(--border); border-radius:10px; height:180px; cursor:pointer;
+               background:#fafaf8; transition:border-color .2s; position:relative; overflow:hidden;">
+        <div id="sig-upload-placeholder" style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <span style="font-size:36px;">📁</span>
+          <span style="font-size:13px; color:var(--muted);">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</span>
+          <span style="font-size:11px; color:#bbb;">รองรับ PNG · JPG · GIF (แนะนำพื้นหลังโปร่งใส)</span>
+        </div>
+        <img id="sig-upload-preview" src="" alt="ลายเซ็น"
+          style="display:none; max-height:150px; max-width:100%; object-fit:contain; border-radius:6px;">
+      </label>
+      <input type="file" id="sig-file-input" accept="image/*" style="display:none" onchange="handleSigUpload(event)">
+
+      <div class="sig-actions" style="margin-top:10px;">
+        <button class="btn btn-outline btn-sm" onclick="clearUploadSig()">🗑 ลบและเลือกใหม่</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📤</span>ส่งรายงาน</div>
+    <div class="notice" style="margin-bottom:16px">
+      <strong>ก่อนส่ง:</strong> กรุณาตรวจสอบข้อมูลและลายมือชื่อให้ครบถ้วน · กำหนดส่ง: ภายในวันที่ <strong>5 ของทุกเดือน</strong>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="window.print()">🖨 พิมพ์รายงาน</button>
+      <button class="btn btn-primary" onclick="savePDF()">💾 บันทึก PDF</button>
+      <button class="btn btn-gold" id="btn-submit" onclick="submitReport()">📤 ส่งรายงาน</button>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-outline" onclick="goStep(2)">← ย้อนกลับแก้ไข</button>
+  </div>
+</div>
+
+<!-- ====== SUCCESS ====== -->
+<div class="panel" id="step-success">
+  <div class="card">
+    <div class="success-wrap">
+      <div class="success-icon">✅</div>
+      <h2>ส่งรายงานเรียบร้อยแล้ว</h2>
+      <p id="success-msg" style="margin-top:8px"></p>
+      <div style="margin-top:32px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a id="success-pdf-link" href="#" target="_blank" class="btn btn-primary" style="display:none; text-decoration:none">📄 เปิด PDF ที่บันทึก</a>
+        <button class="btn btn-outline" onclick="window.print()">🖨 พิมพ์สำเนา</button>
+        <button class="btn btn-gold" onclick="resetForm()">📋 ส่งรายงานใหม่</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNF5Onw5xMojInkz2D6gssIhJYHh-dtGim3GZHqSHvXck3EWEAuB34eUYxUbqq8nTQ4g/exec";
+
+// ===== STATE =====
+let currentPos = null;
+let sigReady   = false;
+let sigHasData = false;
+let sigDrawing = false;
+
+const posNames = {
+  secretary:   'เลขาฯ หน้าห้อง · เจ้าหน้าที่ศาลปกครอง',
+  admin_group: 'ธุรการกลุ่ม · เจ้าพนักงานธุรการปฏิบัติงาน',
+  admin_case:  'ธุรการคดี · เจ้าพนักงานธุรการปฏิบัติงาน',
+  director:    'ผอ.กลุ่ม · ผู้อำนวยการกลุ่มเลขานุการตุลาการ'
+};
+
+// ===== STEP NAV =====
+function goStep(n) {
+  if (n === 2) {
+    if (!document.getElementById('inp-name').value.trim()) { alert('กรุณากรอกชื่อ-นามสกุลก่อน'); return; }
+    if (!currentPos) { alert('กรุณาเลือกตำแหน่งก่อน'); return; }
+    showForm(currentPos);
+    updateMonthLabels();
+  }
+  if (n === 3) {
+    fillConfirmData();
+    initSig();
+  }
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+  const panel = document.getElementById('step' + n);
+  if (panel) panel.classList.add('active');
+  const tab = document.getElementById('tab' + n);
+  if (tab) tab.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== POSITION =====
+function selectPos(pos) {
+  currentPos = pos;
+  document.querySelectorAll('.pos-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('pos-' + pos).classList.add('selected');
+}
+
+function showForm(pos) {
+  document.querySelectorAll('.form-wrap').forEach(f => f.style.display = 'none');
+  document.getElementById('form-' + pos).style.display = 'block';
+}
+
+// ===== MONTH =====
+function thMonthName(iso) {
+  const d = new Date(iso + '-01');
+  const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  return `1 - ${lastDay} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
+}
+
+function updateMonthLabels() {
+  const label = thMonthName(document.getElementById('inp-month').value);
+  ['sec','ag','ac','dir'].forEach(id => {
+    const el = document.getElementById('month-label-' + id);
+    if (el) el.textContent = label;
+  });
+}
+
+function fillConfirmData() {
+  const iso = document.getElementById('inp-month').value;
+  document.getElementById('confirm-name').value  = document.getElementById('inp-name').value;
+  document.getElementById('confirm-pos').value   = posNames[currentPos] || '';
+  document.getElementById('confirm-month').value = thMonthName(iso);
+  const today = new Date();
+  const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  document.getElementById('confirm-date').value  = `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear() + 543}`;
+}
+
+// ===== SIGNATURE TAB =====
+let sigMode = 'draw'; // 'draw' | 'upload'
+let uploadedSigDataURL = null;
+
+function switchSigTab(mode) {
+  sigMode = mode;
+  document.getElementById('sig-panel-draw').style.display   = mode === 'draw'   ? 'block' : 'none';
+  document.getElementById('sig-panel-upload').style.display = mode === 'upload' ? 'block' : 'none';
+  const tabDraw   = document.getElementById('sig-tab-draw');
+  const tabUpload = document.getElementById('sig-tab-upload');
+  if (mode === 'draw') {
+    tabDraw.style.background = 'var(--navy)';   tabDraw.style.color = 'white';   tabDraw.style.fontWeight = '500';
+    tabUpload.style.background = 'white';        tabUpload.style.color = 'var(--muted)'; tabUpload.style.fontWeight = 'normal';
+    initSig();
+  } else {
+    tabUpload.style.background = 'var(--navy)'; tabUpload.style.color = 'white'; tabUpload.style.fontWeight = '500';
+    tabDraw.style.background = 'white';          tabDraw.style.color = 'var(--muted)';   tabDraw.style.fontWeight = 'normal';
+    initDropzone();
+  }
+}
+
+function initDropzone() {
+  const dz = document.getElementById('sig-dropzone');
+  if (dz._dzReady) return;
+  dz._dzReady = true;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = 'var(--navy)'; });
+  dz.addEventListener('dragleave', () => { dz.style.borderColor = 'var(--border)'; });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.style.borderColor = 'var(--border)';
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) loadSigFile(file);
+  });
+}
+
+function handleSigUpload(event) {
+  const file = event.target.files[0];
+  if (file) loadSigFile(file);
+}
+
+function loadSigFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    uploadedSigDataURL = e.target.result;
+    const preview     = document.getElementById('sig-upload-preview');
+    const placeholder = document.getElementById('sig-upload-placeholder');
+    preview.src       = uploadedSigDataURL;
+    preview.style.display       = 'block';
+    placeholder.style.display   = 'none';
+    sigHasData = true;
+    // เปลี่ยน border เป็นสีเขียวเมื่ออัปโหลดสำเร็จ
+    document.getElementById('sig-dropzone').style.borderColor = '#1a6b3c';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearUploadSig() {
+  uploadedSigDataURL = null;
+  sigHasData = false;
+  const preview     = document.getElementById('sig-upload-preview');
+  const placeholder = document.getElementById('sig-upload-placeholder');
+  preview.src     = '';
+  preview.style.display     = 'none';
+  placeholder.style.display = 'flex';
+  document.getElementById('sig-file-input').value = '';
+  document.getElementById('sig-dropzone').style.borderColor = 'var(--border)';
+}
+
+
+function initSig() {
+  if (sigReady) return;
+  sigReady = true;
+
+  const wrap = document.getElementById('sig-wrap');
+  const svg  = document.getElementById('sig-svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('preserveAspectRatio', 'none');
+
+  let curPath = null, pathD = '';
+
+  function pt(e) {
+    const r   = wrap.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return {
+      x: ((src.clientX - r.left) / r.width  * 100).toFixed(2),
+      y: ((src.clientY - r.top)  / r.height * 100).toFixed(2)
+    };
+  }
+
+  function down(e) {
+    e.preventDefault();
+    sigDrawing = true;
+    const p = pt(e);
+    pathD   = `M${p.x} ${p.y}`;
+    curPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+    curPath.setAttribute('fill','none');
+    curPath.setAttribute('stroke','#1a2744');
+    curPath.setAttribute('stroke-width','2.5');
+    curPath.setAttribute('stroke-linecap','round');
+    curPath.setAttribute('stroke-linejoin','round');
+    curPath.setAttribute('vector-effect','non-scaling-stroke');
+    curPath.setAttribute('d', pathD);
+    svg.appendChild(curPath);
+    const hint = document.getElementById('sig-hint');
+    if (hint) hint.classList.add('hidden');
+    sigHasData = true;
+  }
+
+  function move(e) {
+    if (!sigDrawing || !curPath) return;
+    e.preventDefault();
+    const p = pt(e);
+    pathD += ` L${p.x} ${p.y}`;
+    curPath.setAttribute('d', pathD);
+  }
+
+  function up() { sigDrawing = false; curPath = null; }
+
+  wrap.addEventListener('mousedown',   down, { passive: false });
+  wrap.addEventListener('mousemove',   move, { passive: false });
+  wrap.addEventListener('mouseup',     up);
+  wrap.addEventListener('mouseleave',  up);
+  wrap.addEventListener('touchstart',  down, { passive: false });
+  wrap.addEventListener('touchmove',   move, { passive: false });
+  wrap.addEventListener('touchend',    up,   { passive: false });
+  wrap.addEventListener('touchcancel', up,   { passive: false });
+}
+
+function clearSig() {
+  const svg = document.getElementById('sig-svg');
+  if (svg) while (svg.firstChild) svg.removeChild(svg.firstChild);
+  sigHasData = false;
+  const hint = document.getElementById('sig-hint');
+  if (hint) hint.classList.remove('hidden');
+}
+
+// ===== COLLECT ROWS =====
+function collectRows() {
+  const activeForm = document.getElementById('form-' + currentPos);
+  if (!activeForm) return [];
+  const rows = [];
+  activeForm.querySelectorAll('table.report-table tbody tr').forEach(tr => {
+    const cells  = tr.querySelectorAll('td');
+    if (cells.length < 2) return;
+    const inputs = tr.querySelectorAll('input, textarea');
+    const task   = cells[1] ? cells[1].innerText.trim() : '';
+    if (!task && inputs.length === 0) return;
+    const vals = Array.from(inputs).map(i => i.value.trim());
+    rows.push({
+      num: cells[0] ? cells[0].innerText.trim() : '',
+      task, target: vals[0]||'', period: vals[1]||'',
+      result: vals[2]||'', team: vals[3]||'', note: vals[4]||''
+    });
+  });
+  return rows;
+}
+
+// ===== SUBMIT =====
+async function submitReport() {
+  const name = document.getElementById('inp-name').value.trim();
+  if (!name) { alert('กรุณากรอกชื่อก่อนส่ง'); return; }
+  if (!currentPos) { alert('กรุณาเลือกตำแหน่ง'); return; }
+  if (!sigHasData) { alert('กรุณาลงลายมือชื่อหรืออัปโหลดลายเซ็นก่อนส่งรายงาน'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังส่ง...';
+
+  const iso = document.getElementById('inp-month').value;
+
+  // ถ้ายังไม่ตั้ง URL → แสดงหน้าสำเร็จ + แนะนำ print
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    btn.disabled = false;
+    btn.textContent = '📤 ส่งรายงาน';
+    showSuccess(name, iso, null);
+    return;
+  }
+
+  // เลือก signature ตาม mode
+  let sigDataURL = '';
+  if (sigMode === 'upload' && uploadedSigDataURL) {
+    sigDataURL = uploadedSigDataURL;
+  } else {
+    const svg  = document.getElementById('sig-svg');
+    const wrap = document.getElementById('sig-wrap');
+    sigDataURL = await svgToDataURL(svg, wrap.offsetWidth, wrap.offsetHeight);
+  }
+
+  const payload = {
+    name, position: currentPos, positionLabel: posNames[currentPos],
+    reportMonth: thMonthName(iso),
+    submittedAt: document.getElementById('confirm-date').value,
+    signature: sigDataURL,
+    rows: collectRows()
+  };
+
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+    const json = await res.json();
+    if (json.success) { showSuccess(name, iso, json.pdfUrl); }
+    else { throw new Error(json.error || 'เกิดข้อผิดพลาด'); }
+  } catch (err) {
+    console.error(err);
+    showSuccess(name, iso, null); // แสดงสำเร็จแล้วแนะนำ print
+    alert('⚠️ ส่งไม่ถึงระบบ — กรุณาพิมพ์รายงานเก็บไว้เป็นหลักฐาน');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📤 ส่งรายงาน';
+  }
+}
+
+function svgToDataURL(svgEl, w, h) {
+  return new Promise(resolve => {
+    const clone = svgEl.cloneNode(true);
+    clone.setAttribute('width', w);
+    clone.setAttribute('height', h);
+    const xml  = new XMLSerializer().serializeToString(clone);
+    const blob = new Blob([xml], { type:'image/svg+xml' });
+    const url  = URL.createObjectURL(blob);
+    const img  = new Image();
+    img.onload = () => {
+      const cv  = document.createElement('canvas');
+      cv.width  = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      resolve(cv.toDataURL('image/png'));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(''); };
+    img.src = url;
+  });
+}
+
+function showSuccess(name, iso, pdfUrl) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('step-success').classList.add('active');
+  document.getElementById('success-msg').textContent =
+    `${name} · ${posNames[currentPos]} · รายงานประจำ${thMonthName(iso)}`;
+  const pdfLink = document.getElementById('success-pdf-link');
+  if (pdfLink && pdfUrl) { pdfLink.href = pdfUrl; pdfLink.style.display = 'inline-flex'; }
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function savePDF() {
+  alert('💡 กด "พิมพ์" แล้วเลือก "Save as PDF" ใน Destination ของ browser ครับ');
+  window.print();
+}
+
+function resetForm() {
+  document.getElementById('inp-name').value = '';
+  currentPos = null; sigReady = false; sigHasData = false;
+  sigMode = 'draw'; uploadedSigDataURL = null;
+  document.querySelectorAll('.pos-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.form-wrap').forEach(f => f.style.display = 'none');
+  clearSig();
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('step1').classList.add('active');
+  document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab1').classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+</script>
+</body>
+</html>
