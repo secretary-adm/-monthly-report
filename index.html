@@ -500,114 +500,6 @@
     from { opacity:0; transform:translateY(14px); }
     to   { opacity:1; transform:translateY(0); }
   }
-
-  /* ── Confirm modal ── */
-  .modal-backdrop {
-    display:none;
-    position:fixed;inset:0;z-index:1000;
-    background:rgba(15,23,42,0.45);
-    backdrop-filter:blur(4px);
-    align-items:center;justify-content:center;
-    padding:20px;
-  }
-  .modal-backdrop.show { display:flex; animation:backdropIn .2s ease; }
-  @keyframes backdropIn { from{opacity:0} to{opacity:1} }
-
-  .modal {
-    background:#fff;
-    border-radius:22px;
-    padding:32px 28px;
-    max-width:420px;width:100%;
-    box-shadow:0 20px 60px rgba(0,0,0,0.15),0 4px 16px rgba(0,0,0,0.08);
-    animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);
-    text-align:center;
-  }
-  @keyframes modalIn { from{opacity:0;transform:scale(.92) translateY(12px)} to{opacity:1;transform:none} }
-
-  .modal-icon { font-size:46px; margin-bottom:14px; }
-
-  .modal-title {
-    font-family:'Noto Serif Thai',serif;
-    font-size:20px;font-weight:700;color:var(--text);
-    margin-bottom:8px;
-  }
-
-  .modal-warning {
-    display:inline-flex;align-items:center;gap:7px;
-    background:var(--orange-light);
-    border:1.5px solid #fed7aa;
-    border-radius:10px;
-    padding:9px 14px;
-    font-size:13px;font-weight:600;color:#9a3412;
-    margin:12px 0 18px;
-    text-align:left;line-height:1.5;
-  }
-
-  .modal-summary {
-    background:var(--bg);
-    border:1.5px solid var(--border);
-    border-radius:12px;
-    padding:14px 16px;
-    margin-bottom:22px;
-    text-align:left;
-  }
-
-  .modal-row {
-    display:flex;justify-content:space-between;align-items:center;
-    font-size:13.5px;padding:4px 0;
-  }
-  .modal-row:not(:last-child) { border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:8px; }
-  .modal-row-label { color:var(--text-muted);font-weight:500; }
-  .modal-row-val   { color:var(--text);font-weight:700;text-align:right;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-
-  .modal-checkbox-wrap {
-    display:flex;align-items:flex-start;gap:10px;
-    background:var(--sky);
-    border:1.5px solid var(--sky-mid);
-    border-radius:12px;padding:12px 14px;
-    margin-bottom:22px;text-align:left;cursor:pointer;
-    transition:all .18s;
-    user-select:none;
-  }
-  .modal-checkbox-wrap:hover { border-color:var(--blue-light); }
-  .modal-checkbox-wrap.checked { background:#f0fdf4;border-color:#86efac; }
-
-  .modal-checkbox {
-    width:20px;height:20px;border-radius:6px;
-    border:2px solid var(--border);
-    background:#fff;flex-shrink:0;margin-top:1px;
-    display:flex;align-items:center;justify-content:center;
-    transition:all .18s;font-size:13px;
-  }
-  .modal-checkbox-wrap.checked .modal-checkbox {
-    background:var(--green);border-color:var(--green);color:#fff;
-  }
-
-  .modal-checkbox-text {
-    font-size:13.5px;line-height:1.55;color:var(--text-mid);font-weight:500;
-  }
-  .modal-checkbox-text strong { color:var(--text); }
-
-  .modal-actions { display:flex;gap:10px; }
-
-  .modal-btn-cancel {
-    flex:1;padding:13px;border-radius:12px;
-    background:#fff;border:1.5px solid var(--border);
-    color:var(--text-mid);font-family:'Sarabun',sans-serif;
-    font-size:15px;font-weight:700;cursor:pointer;transition:all .18s;
-  }
-  .modal-btn-cancel:hover { border-color:var(--blue-light);color:var(--blue);background:var(--sky); }
-
-  .modal-btn-confirm {
-    flex:2;padding:13px;border-radius:12px;
-    background:linear-gradient(135deg,var(--blue),var(--blue-dark));
-    border:none;color:#fff;
-    font-family:'Sarabun',sans-serif;font-size:15px;font-weight:700;
-    cursor:pointer;transition:all .22s;
-    box-shadow:0 4px 14px rgba(2,132,199,0.3);
-  }
-  .modal-btn-confirm:hover:not(:disabled) { transform:translateY(-2px);box-shadow:0 8px 20px rgba(2,132,199,0.4); }
-  .modal-btn-confirm:disabled { opacity:.4;cursor:not-allowed;transform:none;box-shadow:none; }
 </style>
 </head>
 <body>
@@ -694,7 +586,7 @@
       </div>
     </div>
 
-    <button class="btn-submit" id="btnSubmit" disabled onclick="openConfirmModal()">
+    <button class="btn-submit" id="btnSubmit" disabled onclick="submitReport()">
       ส่งรายงาน
     </button>
 
@@ -709,49 +601,6 @@
 
   </div>
 
-
-  <!-- ── Confirm modal ── -->
-  <div class="modal-backdrop" id="confirmModal">
-    <div class="modal">
-      <div class="modal-icon">📋</div>
-      <div class="modal-title">ยืนยันการส่งรายงาน</div>
-
-      <div class="modal-warning">
-        ⚠️ ตรวจสอบข้อมูลให้ครบถ้วน<br><strong>ระบบรับได้เดือนละ 1 ครั้งเท่านั้น</strong>
-      </div>
-
-      <div class="modal-summary">
-        <div class="modal-row">
-          <span class="modal-row-label">เดือนที่รายงาน</span>
-          <span class="modal-row-val" id="confirmMonth">—</span>
-        </div>
-        <div class="modal-row">
-          <span class="modal-row-label">ชื่อ-นามสกุล</span>
-          <span class="modal-row-val" id="confirmName">—</span>
-        </div>
-        <div class="modal-row">
-          <span class="modal-row-label">ไฟล์</span>
-          <span class="modal-row-val" id="confirmFile">—</span>
-        </div>
-      </div>
-
-      <div class="modal-checkbox-wrap" id="confirmCheck" onclick="toggleCheck()">
-        <div class="modal-checkbox" id="checkIcon"></div>
-        <div class="modal-checkbox-text">
-          ข้าพเจ้าได้<strong>ตรวจสอบข้อมูลในไฟล์แล้ว</strong><br>
-          และรับทราบว่าสามารถส่งได้<strong>เดือนละ 1 ครั้งเท่านั้น</strong>
-        </div>
-      </div>
-
-      <div class="modal-actions">
-        <button class="modal-btn-cancel" onclick="closeModal()">ยกเลิก</button>
-        <button class="modal-btn-confirm" id="confirmBtn" disabled onclick="confirmAndSend()">
-          ✅ ยืนยันส่งรายงาน
-        </button>
-      </div>
-    </div>
-  </div>
-
   <div class="admin-link">
     สำหรับผู้ดูแลระบบ → <a href="admin.html">หน้า Dashboard Admin</a>
   </div>
@@ -763,7 +612,7 @@
 //  CONFIG — แก้ไขค่านี้ให้ตรงกับของจริง
 // ============================================================
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw0vKnK9vSfUDAepzjJ7eVcn4KLtu08HU1X4CvKw8MnTHI_tcNNDbZcjSl1gi6sQZU23Q/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwvVytbLhLpBcKANx5GcdplAdOeurtnCsbdPYNyqisqFJ-1dtSAUOROQP_lyP9dUzCT/exec',
   TOTAL_STAFF: 88,
   OPEN_FROM_DAY: 29,   // เปิดรับตั้งแต่วันที่ XX ของเดือนนั้น (เช่น 26)
   CLOSE_ON_DAY: 8     // ปิดรับวันที่ XX ของเดือนถัดไป (เช่น 10)
@@ -780,12 +629,11 @@ let currentMonth = null; // "YYYY-MM" format
 
 // ── Init ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  const state = calcReportState();   // ← set currentMonth ที่นี่
+  const state = calcReportState();
   renderMonthUI(state);
-  initModal();
-  loadStats(currentMonth);           // ← ส่ง currentMonth ตรงๆ หลัง calcReportState
   if (state.isOpen) {
     loadStaffList();
+    loadStats();
     initDropZone();
   }
   setInterval(() => {
@@ -901,44 +749,15 @@ function renderCountdown(state) {
   }
 }
 
-// ── JSONP helper — แก้ CORS บน GitHub Pages ─────────────────
-// fetch ปกติ ติด CORS กับ Apps Script → ใช้ <script> tag แทน
-let _jsonpCounter = 0;
-function jsonp(url) {
-  return new Promise((resolve, reject) => {
-    const cbName = '__jsonp_cb_' + (++_jsonpCounter);
-    const script = document.createElement('script');
-    const timer  = setTimeout(() => {
-      cleanup();
-      reject(new Error('JSONP timeout'));
-    }, 15000);
-
-    window[cbName] = (data) => {
-      cleanup();
-      resolve(data);
-    };
-
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-    }
-
-    script.onerror = () => { cleanup(); reject(new Error('JSONP script error')); };
-    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
-    document.head.appendChild(script);
-  });
-}
-
 // ── Staff list from Apps Script ─────────────────────────────
 async function loadStaffList() {
   const sel = document.getElementById('nameSelect');
   try {
-    const data = await jsonp(`${CONFIG.APPS_SCRIPT_URL}?action=getStaff`);
+    const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStaff`);
+    const data = await res.json();
     sel.innerHTML = '<option value="">— เลือกชื่อของท่าน —</option>';
     data.staff.forEach(name => sel.appendChild(new Option(name, name)));
   } catch (e) {
-    console.error('loadStaffList:', e);
     sel.innerHTML = '<option value="">— ไม่สามารถโหลดรายชื่อได้ —</option>';
   }
   sel.addEventListener('change', checkReady);
@@ -983,14 +802,10 @@ function checkReady() {
 }
 
 // ── Stats (จำนวนคนส่งแล้ว) ────────────────────────────────
-async function loadStats(month) {
-  month = month || currentMonth;
-  if (!month) { console.warn('loadStats: month is null'); return; }
+async function loadStats() {
   try {
-    const url = `${CONFIG.APPS_SCRIPT_URL}?action=getDashboard&month=${encodeURIComponent(month)}`;
-    console.log('loadStats fetching:', url);
-    const res  = await jsonp(url);
-    const data   = res; // jsonp คืน object โดยตรง ไม่ต้อง .json()
+    const res  = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getDashboard&month=${encodeURIComponent(currentMonth)}`);
+    const data = await res.json();
     const total  = data.total || CONFIG.TOTAL_STAFF;
     const sent   = data.sent  || 0;
     const unsent = total - sent;
@@ -1008,49 +823,6 @@ async function loadStats(month) {
   }
 }
 
-// ── Confirm modal ────────────────────────────────────────────
-function openConfirmModal() {
-  const name  = document.getElementById('nameSelect').value;
-  const month = currentMonth;
-
-  // เติมข้อมูลใน modal
-  document.getElementById('confirmMonth').textContent = getMonthLabel(month);
-  document.getElementById('confirmName').textContent  = name;
-  document.getElementById('confirmFile').textContent  = selectedFile ? selectedFile.name : '—';
-
-  // reset checkbox
-  document.getElementById('confirmCheck').classList.remove('checked');
-  document.getElementById('checkIcon').textContent = '';
-  document.getElementById('confirmBtn').disabled = true;
-
-  document.getElementById('confirmModal').classList.add('show');
-}
-
-function closeModal() {
-  document.getElementById('confirmModal').classList.remove('show');
-}
-
-function toggleCheck() {
-  const wrap = document.getElementById('confirmCheck');
-  const icon = document.getElementById('checkIcon');
-  const btn  = document.getElementById('confirmBtn');
-  const checked = wrap.classList.toggle('checked');
-  icon.textContent = checked ? '✓' : '';
-  btn.disabled = !checked;
-}
-
-// ปิด modal เมื่อคลิกพื้นหลัง (set up after DOM ready)
-function initModal() {
-  document.getElementById('confirmModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-  });
-}
-
-function confirmAndSend() {
-  closeModal();
-  submitReport();
-}
-
 // ── Submit ──────────────────────────────────────────────────
 async function submitReport() {
   const name  = document.getElementById('nameSelect').value;
@@ -1060,39 +832,24 @@ async function submitReport() {
   try {
     const base64 = await toBase64(selectedFile);
     animateProgress(0, 60, 800);
-    // ส่งผ่าน JSONP — ข้าม CORS ได้ แต่ base64 ขนาดใหญ่ต้องแบ่ง chunk
-    // วิธีนี้ใช้ได้สำหรับ PDF ขนาดเล็ก-กลาง (< 1MB หลัง base64)
-    // Apps Script รับผ่าน GET parameter "data"
-    animateProgress(30, 60, 600);
-    const payload = JSON.stringify({
-      action: 'submitReport', name, month,
-      fileName: selectedFile.name,
-      fileSize: selectedFile.size,
-      fileBase64: base64
+    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({ action:'submitReport', name, month, fileName:selectedFile.name, fileSize:selectedFile.size, fileBase64:base64 })
     });
-    animateProgress(60, 80, 400);
-    const data = await jsonp(
-      `${CONFIG.APPS_SCRIPT_URL}?action=submitReport&data=${encodeURIComponent(payload)}`
-    );
+    animateProgress(60, 100, 400);
+    const data = await res.json();
     await delay(400);
     if (data.success) {
       showAlert('success', `ส่งรายงานสำเร็จ! <br><small style="opacity:0.75">ชื่อ: ${name} | เดือน: ${getMonthLabel(month)} | เวลา: ${new Date().toLocaleString('th-TH')}</small>`);
       clearFile();
       document.getElementById('nameSelect').value = '';
       checkReady();
-      loadStats(currentMonth); // อัพเดต stat หลังส่งสำเร็จ
+      loadStats(); // อัพเดต stat หลังส่งสำเร็จ
     } else {
       showAlert('error', data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
     }
   } catch (e) {
-    // แสดง error จริงเพื่อ debug
-    const msg = e?.message || String(e);
-    console.error('submitReport error:', e);
-    showAlert('error',
-      `ไม่สามารถเชื่อมต่อระบบได้<br>` +
-      `<small style="font-family:monospace;font-size:11px;opacity:.8">${msg}</small><br>` +
-      `<small style="opacity:.7">เปิด F12 → Console เพื่อดูรายละเอียด</small>`
-    );
+    showAlert('error', 'ไม่สามารถเชื่อมต่อระบบได้ กรุณาตรวจสอบอินเตอร์เน็ตและลองใหม่');
   } finally {
     setLoading(false);
     hideProgress();
